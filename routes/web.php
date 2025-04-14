@@ -11,6 +11,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ApiController;
 
 // Redirect the root path to /dashboard
 Route::redirect('/', 'dashboard');
@@ -37,6 +38,8 @@ Route::middleware('auth')->group(function () {
 
         // Knowledge
         Route::get('knowledge', [KnowledgeController::class, 'index'])->name('knowledge.index');
+        Route::get('/bilans/create', [KnowledgeController::class, 'create'])->name('bilans.create');
+        Route::post('/send-prompt', [ApiController::class, 'sendPrompt'])->name('send.prompt');
 
         // Groups
         Route::get('groups', [GroupController::class, 'index'])->name('group.index');
@@ -47,8 +50,6 @@ Route::middleware('auth')->group(function () {
         // Common life
         Route::get('common-life', [CommonLifeController::class, 'index'])->name('common-life.index');
         Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
-
-        // Common life / overview
         Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
         
     });

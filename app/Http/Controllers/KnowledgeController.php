@@ -6,6 +6,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class KnowledgeController extends Controller
 {
@@ -14,7 +15,18 @@ class KnowledgeController extends Controller
      *
      * @return Factory|View|Application|object
      */
-    public function index() {
-        return view('pages.knowledge.index');
+
+
+    public function index()
+    {
+        $user = Auth::user();
+        return view('pages.knowledge.index', compact('user'));
     }
+
+    public function create()
+    {
+        return view('pages.knowledge.create');
+    }
+
+
 }
