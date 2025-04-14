@@ -10,6 +10,7 @@ use App\Http\Controllers\KnowledgeController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaskController;
 
 // Redirect the root path to /dashboard
 Route::redirect('/', 'dashboard');
@@ -45,8 +46,27 @@ Route::middleware('auth')->group(function () {
 
         // Common life
         Route::get('common-life', [CommonLifeController::class, 'index'])->name('common-life.index');
+        Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
+
+        // Common life / overview
+        Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+        
     });
 
 });
 
+
+// Tasks (admin only)
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+
+    Route::get('/tasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');
+
+    Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+
+    Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+});
+
 require __DIR__.'/auth.php';
+

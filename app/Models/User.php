@@ -75,10 +75,30 @@ class User extends Authenticatable
     /**
      * @return (Model&object)|null
      */
-    public function school() {
+    public function school()
+    {
         // With this, the user can only have 1 school
         return $this->belongsToMany(School::class, 'users_schools')
             ->withPivot('role')
             ->first();
     }
+
+    /**
+     * This function retrieves the user's role from the user_school table
+     */
+    public function userSchool()
+    {
+        return $this->hasOne(UserSchool::class);
+    }
+
+    /**
+     * This function retrieves the user's role from the task_user table
+     */
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class)
+            ->withPivot('is_completed', 'comment')
+            ->withTimestamps();
+    }
+
 }

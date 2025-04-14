@@ -24,16 +24,28 @@
             </div>
         </div>
         <div class="lg:col-span-1">
-            <div class="card card-grid h-full min-w-full">
+            <div class="card h-full">
                 <div class="card-header">
                     <h3 class="card-title">
-                        Block 2
+                        Ajouter une tache commune
                     </h3>
                 </div>
                 <div class="card-body flex flex-col gap-5">
+                    <x-forms.input name="name" :label="__('Nom')" />
+
+                    <x-forms.input name="description" :label="__('Description')" />
+
+                    <x-forms.input type="date" name="year" :label="__('Début de l\'année')" placeholder="" />
+
+                    <x-forms.input type="date" name="year" :label="__('Fin de l\'année')" placeholder="" />
+
+                    <x-forms.primary-button>
+                        {{ __('Valider') }}
+                    </x-forms.primary-button>
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <!-- end: grid -->
 </x-app-layout>

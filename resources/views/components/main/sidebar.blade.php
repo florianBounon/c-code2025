@@ -215,7 +215,7 @@
                                 @csrf
                                 <a class="btn btn-sm btn-light justify-center"
                                    href="{{ route('logout') }}" onclick="event.preventDefault();this.closest('form').submit();">
-                                    {{ _('Log out') }}
+                                    {{ __('Log out') }}
                                 </a>
                             </form>
                         </div>
