@@ -45,9 +45,9 @@
                 <select id="difficulty" name="difficulty"
                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     required>
-                    <option value="Easy">Facile</option>
-                    <option value="Intermediate">Intermédiaire</option>
-                    <option value="hard">Difficile</option>
+                    <option value="Facile">Facile</option>
+                    <option value="Intermédiaire">Intermédiaire</option>
+                    <option value="Difficile">Difficile</option>
                 </select>
             </div>
 

@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Questionnaire;
 
 class KnowledgeController extends Controller
 {
@@ -20,7 +21,8 @@ class KnowledgeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('pages.knowledge.index', compact('user'));
+        $questionnaires = Questionnaire::all(); 
+        return view('pages.knowledge.index', compact('user', 'questionnaires'));
     }
 
     public function create()

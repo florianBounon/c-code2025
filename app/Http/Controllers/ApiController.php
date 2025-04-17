@@ -17,7 +17,7 @@ class ApiController extends Controller
     {
         $request->validate([
             'language' => 'required|string',
-            'difficulty' => 'required|string|in:Easy,Intermediate,hard',
+            'difficulty' => 'required|string|in:Facile,Intermédiaire,Difficile',
             'questionsCount' => 'required|integer|min:2',
             'reponsesCount' => 'required|integer|min:3',
         ], [
@@ -34,9 +34,9 @@ class ApiController extends Controller
         // Prevent overloading the questionnaire
         $complexite = ($request->input('questionsCount') * 1.25) * $request->input('reponsesCount');
         $complexiteMax = 125;
-        if ($difficulty == "Intermediate") {
+        if ($difficulty == "Intermédiaire") {
             $complexite *= 1.20;
-        } elseif ($difficulty == "hard") {
+        } elseif ($difficulty == "Difficile") {
             $complexite *= 1.40;
         }
         if ($complexite > $complexiteMax) {
@@ -61,10 +61,18 @@ class ApiController extends Controller
         ...
         
         Une fois toutes les questions affichées, affiche les bonnes réponses à la fin, sous la forme suivante :
+        réponse:
         réponse question "numéro de la question" : réponse "numéro de la bonne réponse" : "contenu de la bonne réponse"
+        réponse question "numéro de la question" : réponse "numéro de la bonne réponse" : "contenu de la bonne réponse"
+        ...
         
         Enfin, ajoute un lien vers une image représentant le langage utilisé dans le questionnaire, sous la forme :
         image : <"lien de l'image">
+
+        Important :
+        - Ne mets pas d'espaces spéciaux ou insécables (pas de caractères Unicode comme \\u00A0)
+        - Utilise uniquement des espaces classiques (code ASCII 32)
+        - Garde exactement le format précisé (pas de variation de ponctuation ou d'espacement)
         
 EOD;
 
@@ -89,8 +97,10 @@ EOD;
             $data = $response->json();
             $content = $data['choices'][0]['message']['content'];
 
+
+
             // Extracting raw content
-            preg_match_all('/Question (\d+) : ([0-9.]+) : (.*?)\n(.*?)\n(?=(Question|\nRéponses|Image))/s', $content, $matches, PREG_SET_ORDER);
+            preg_match_all('/Question (\d+) : ([0-9.]+) : (.*?)\n(.*?)\n(?=(Question|\nRéponses|Image|---))/s', $content, $matches, PREG_SET_ORDER);
             preg_match_all('/réponse question (\d+) : réponse (\d+)/', $content, $correctAnswersMatches);
 
             $correctAnswers = [];
