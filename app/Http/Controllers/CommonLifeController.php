@@ -5,36 +5,55 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Task;
+use App\Models\Promotion;
 
 class CommonLifeController extends Controller
 {
+    /**
+     * Display the common life tasks page.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        $user = Auth::user(); // Get the currently authenticated user
+        $user = Auth::user();
 
-        // Retrieve all tasks with their relationships (users)
-        $tasks = Task::with('users')->get();
+        // Get all tasks with related users and promotions
+        $tasks = Task::with(['users', 'promotions'])->get();
 
-        // Filter tasks that are in progress (not completed)
-        $tasksInProgress = $tasks->filter(function ($task) use ($user) {
-            $userPivot = $task->users->firstWhere('id', $user->id)?->pivot;
-            return !$userPivot || $userPivot->is_completed == false;
-        });
+        if ($user->userSchool->role === 'student') {
+            // Get the promotions linked to the user
+            $userPromotions = $user->promotions;
 
-        // Filter tasks completed by the currently logged-in user
-        $completedTasksByUser = $tasks->filter(function ($task) use ($user) {
-            $userPivot = $task->users->firstWhere('id', $user->id)?->pivot;
-            return $userPivot && $userPivot->is_completed == true;
-        });
-
-        // Filter tasks completed by all students (for admins)
-        $completedTasks = $tasks->filter(function ($task) {
-            return $task->users->contains(function ($user) {
-                return $user->pivot->is_completed == true;
+            // Filter tasks where at least one promotion matches the user's promotions
+            $tasks = $tasks->filter(function ($task) use ($userPromotions) {
+                return $task->promotions->intersect($userPromotions)->isNotEmpty();
             });
+        }
+
+        // Tasks that are in progress (not completed by the user)
+        $tasksInProgress = $tasks->filter(function ($task) use ($user) {
+            $pivot = $task->users->firstWhere('id', $user->id)?->pivot;
+            return !$pivot || $pivot->is_completed == false;
+        });
+        
+
+        // Tasks completed by the current user
+        $completedTasksByUser = $tasks->filter(function ($task) use ($user) {
+            // Use the pivot values here directly
+            $userTask = $task->users->firstWhere('id', $user->id);
+            return $userTask && $userTask->pivot->is_completed;
         });
 
-        // Return the view with the necessary data
+        // For admin: tasks completed by at least one student
+        // Here, we use the whereHas method with a custom filter
+        $completedTasks = Task::with(['users', 'promotions'])
+            ->whereHas('users', function ($q) {
+                // Check if the user in the pivot table has completed the task
+                $q->where('task_user.is_completed', true); // Explicitly specify the table name in where clause
+            })
+            ->get();
+
         return view('pages.commonLife.index', [
             'user' => $user,
             'tasksInProgress' => $tasksInProgress,

@@ -2,34 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task; 
+use App\Models\Task;
 use Illuminate\Http\Request;
+use App\Models\Promotion;
+use App\Models\Auth;
 
 class TaskController extends Controller
 {
     public function store(Request $request)
     {
-
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
+        // Validate incoming data
+        $request->validate([
+            'name' => 'required|string',
             'description' => 'nullable|string',
             'year_start' => 'required|date',
             'year_end' => 'required|date',
+            'promotions' => 'required|array',
+            'promotions.*' => 'exists:promotions,id',
         ]);
 
-        $task = new Task();
-        $task->name = $validatedData['name'];
-        $task->description = $validatedData['description'] ?? null;
-        $task->year_start = $validatedData['year_start'];
-        $task->year_end = $validatedData['year_end'];
-        $task->save();
+        // Create the task
+        $task = Task::create($request->only(['name', 'description', 'year_start', 'year_end']));
 
-        return redirect()->back()->with('success', 'Tâche ajoutée avec succès.');
+        // Attach the task to the selected promotions
+        $task->promotions()->attach($request->input('promotions'));
+
+        return redirect()->route('commonLife.index')->with('success', 'Task successfully added.');
     }
-
 
     public function edit(Task $task)
     {
+        // Check if the current user is an admin
         $user = auth()->user();
         if ($user->userSchool->role !== 'admin') {
             abort(403);
@@ -40,6 +43,7 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
+        // Validate the incoming data
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -47,31 +51,40 @@ class TaskController extends Controller
             'year_end' => 'required|date',
         ]);
 
+        // Update the task details
         $task->update($request->only(['name', 'description', 'year_start', 'year_end']));
 
-        return redirect()->route('common-life.index')->with('success', 'Tâche mise à jour.');
+        // Sync the task with the selected promotions
+        $task->promotions()->sync($request->input('promotions'));
+
+        return redirect()->route('common-life.index')->with('success', 'Task successfully updated.');
     }
 
     public function destroy(Task $task)
     {
+        // Check if the current user is an admin
         $user = auth()->user();
         if ($user->userSchool->role !== 'admin') {
             abort(403);
         }
 
+        // Delete the task
         $task->delete();
 
-        return redirect()->back()->with('success', 'Tâche supprimée.');
+        return redirect()->back()->with('success', 'Task successfully deleted.');
     }
 
     public function complete(Request $request, Task $task)
     {
+        // Validate the comment input
         $request->validate([
             'comment' => 'nullable|string|max:1000',
         ]);
 
+        // Get the authenticated user
         $user = auth()->user();
 
+        // Mark the task as completed for the user and add the comment
         $user->tasks()->syncWithoutDetaching([
             $task->id => [
                 'is_completed' => true,
@@ -79,7 +92,20 @@ class TaskController extends Controller
             ]
         ]);
 
-        return redirect()->back()->with('success', 'Tâche marquée comme terminée.');
+        return redirect()->back()->with('success', 'Task marked as completed.');
+    }
+
+    public function index()
+    {
+        $user = auth()->user();
+
+        $tasksInProgress = Task::whereHas('promotions', function ($query) use ($user) {
+            $query->whereIn('id', $user->promotions->pluck('id'));
+        })->get();
+
+        
+
+        return view('pages.vie-commune.index', compact('tasksInProgress', 'user'));
     }
 
 }

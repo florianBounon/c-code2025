@@ -27,9 +27,14 @@ class Task extends Model
      */
     public function users()
     {
-        return $this->belongsToMany(User::class)
-            ->withPivot('is_completed', 'comment')
-            ->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot('is_completed', 'comment')->withTimestamps();
+    }
+
+
+
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class);
     }
 
 }

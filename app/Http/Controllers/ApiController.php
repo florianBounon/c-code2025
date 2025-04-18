@@ -10,9 +10,39 @@ use Psy\Command\EditCommand;
 use App\Models\Questionnaire;
 use App\Models\Question;
 use App\Models\Answer;
+use App\Models\Promotion;
 
 class ApiController extends Controller
 {
+    public function edit(Questionnaire $questionnaire)
+    {
+        $promotions = Promotion::all();
+
+        $selectedPromotions = $questionnaire->promotions;
+
+        return view('pages.knowledge.edit', compact('questionnaire', 'promotions', 'selectedPromotions'));
+    }
+
+    public function update(Request $request, Questionnaire $questionnaire)
+    {
+        $request->validate([
+            'promotions' => 'required|array',
+            'promotions.*' => 'exists:promotions,id',
+        ]);
+
+        $questionnaire->promotions()->sync($request->input('promotions'));
+
+        return redirect()->route('bilans.index')->with('success', 'Les promotions ont été mises à jour.');
+    }
+
+
+
+    public function create()
+    {
+        $promotions = Promotion::all();
+        return view('pages.knowledge.create', compact('promotions'));
+    }
+
     public function sendPrompt(Request $request)
     {
         $request->validate([
@@ -20,6 +50,8 @@ class ApiController extends Controller
             'difficulty' => 'required|string|in:Facile,Intermédiaire,Difficile',
             'questionsCount' => 'required|integer|min:2',
             'reponsesCount' => 'required|integer|min:3',
+            'promotions' => 'required|array',
+            'promotions.*' => 'exists:promotions,id',
         ], [
             'questionsCount.min' => 'Le nombre de questions doit être supérieur à 1.',
             'reponsesCount.min' => 'Le nombre de réponses doit être supérieur à 2.',
@@ -47,10 +79,21 @@ class ApiController extends Controller
                 ]);
         }
 
-
+        switch ($difficulty) {
+            case "Facile":
+                $difficultyDistribution = "60% simples (coef 0.0-0.3), 30% moyennes (coef 0.4-0.6), 10% difficiles (coef 0.7-1.0)";
+                break;
+            case "Intermédiaire":
+                $difficultyDistribution = "30% simples (coef 0.0-0.3), 40% moyennes (coef 0.4-0.6), 30% difficiles (coef 0.7-1.0)";
+                break;
+            case "Difficile":
+                $difficultyDistribution = "10% simples (coef 0.0-0.3), 30% moyennes (coef 0.4-0.6), 60% difficiles (coef 0.7-1.0)";
+                break;
+        }
 
         $prompt = <<<EOD
         Créer un questionnaire sur le langage de programmation $language avec un niveau de difficulté $difficulty.
+        La répartition des questions est la suivante : $difficultyDistribution.
         Le questionnaire doit contenir $questionsCount questions,
         et chaque question doit avoir $reponsesCount réponses possibles.
 
@@ -116,6 +159,8 @@ EOD;
                 'answers_count' => $reponsesCount,
             ]);
 
+            $questionnaire->promotions()->attach($request->input('promotions'));
+
             // Processing the questions
             foreach ($matches as $match) {
                 $questionNumber = $match[1];
@@ -146,7 +191,7 @@ EOD;
 
 
             // Process the data received from the API debug
-            //dd($content);
+            dd($content);
 
             return redirect()->back()->with('success', 'Prompt sent successfully!');
         } else {

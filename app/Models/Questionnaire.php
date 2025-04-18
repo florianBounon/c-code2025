@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use \App\Models\Result;
 
 class Questionnaire extends Model
 {
@@ -20,4 +21,15 @@ class Questionnaire extends Model
     {
         return $this->hasMany(Question::class);
     }
+
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'promotion_questionnaire');
+    }
+
+    public function results()
+    {
+        return $this->hasMany(Result::class);
+    }
+
 }

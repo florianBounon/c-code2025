@@ -98,3 +98,15 @@ npm run dev
 - 🧠 Génération automatique de QCM par langage sélectionné
 - ✅ Système de Kanban pour les rétrospectives
 - 📈 Statistiques d’usage et suivi pédagogique
+
+
+## Backlog fini
+
+### Tâches communes
+- Les admin peuvent créer des tâches
+- Les students peuvent les accepter
+- Les tâches s'affichent dans tâches ou tâches fini lorsqu'elles le sont
+
+### Questionnaire
+- Les questionnaires peuvent être créer par les admins grâce à l'API Mistral
+- Les students peuvent répondre au questionnaire, ne peuvent pas le refaire et ont leur note sur la page du questionnaire

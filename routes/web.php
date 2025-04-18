@@ -40,6 +40,21 @@ Route::middleware('auth')->group(function () {
         Route::get('knowledge', [KnowledgeController::class, 'index'])->name('knowledge.index');
         Route::get('/bilans/create', [KnowledgeController::class, 'create'])->name('bilans.create');
         Route::post('/send-prompt', [ApiController::class, 'sendPrompt'])->name('send.prompt');
+        Route::get('/bilans/{questionnaire}', [KnowledgeController::class, 'show'])->name('bilans.show');
+        Route::get('/bilans/create', [KnowledgeController::class, 'create'])->name('bilans.create');
+        Route::post('/bilans', [KnowledgeController::class, 'store'])->name('bilans.store');
+        Route::get('/bilans', [KnowledgeController::class, 'index'])->name('bilans.index');
+        Route::get('/bilans/create', [ApiController::class, 'create'])->name('bilans.create');
+        Route::post('/bilans', [ApiController::class, 'sendPrompt'])->name('send.prompt');
+        Route::get('/bilans/{questionnaire}/edit', [ApiController::class, 'edit'])->name('bilans.edit');
+        Route::put('/bilans/{questionnaire}', [ApiController::class, 'update'])->name('bilans.update');
+        Route::get('/bilans/{questionnaire}/start', [KnowledgeController::class, 'start'])
+            ->name('bilans.start')
+            ->middleware('auth');
+        Route::post('/bilans/{questionnaire}/submit', [KnowledgeController::class, 'submit'])
+            ->name('bilans.submit')
+            ->middleware('auth');
+
 
         // Groups
         Route::get('groups', [GroupController::class, 'index'])->name('group.index');
@@ -51,7 +66,8 @@ Route::middleware('auth')->group(function () {
         Route::get('common-life', [CommonLifeController::class, 'index'])->name('common-life.index');
         Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
         Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
-        
+        Route::get('/vie-commune', [CommonLifeController::class, 'index'])->name('commonLife.index');
+
     });
 
 });
@@ -69,5 +85,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
