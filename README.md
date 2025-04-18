@@ -110,3 +110,6 @@ npm run dev
 ### Questionnaire
 - Les questionnaires peuvent être créer par les admins grâce à l'API Mistral
 - Les students peuvent répondre au questionnaire, ne peuvent pas le refaire et ont leur note sur la page du questionnaire
+
+### conection
+- les promotions est la connexion au utilisateurs doient être faite a la main
